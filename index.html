@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ПДД Тренажёр</title>
+<meta name="theme-color" content="#2f6fed">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ПДД 2024">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#f4f5f7;--card:#fff;--text:#1b1d22;--muted:#6b7280;--line:#e3e5ea;
+  --accent:#2f6fed;--accent-soft:#e7efff;--ok:#1f9d55;--ok-soft:#e3f6ea;--bad:#d64545;--bad-soft:#fde8e8;
+  --warn:#d98b0b;--warn-soft:#fdf2dc;--cell:#dfe2e8;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121418;--card:#1c1f25;--text:#e8eaee;--muted:#9aa1ad;--line:#2c3038;
+  --accent:#6b9bff;--accent-soft:#1f2a44;--ok:#3cc574;--ok-soft:#173326;--bad:#ff6b6b;--bad-soft:#3a1d1f;
+  --warn:#f0b34a;--warn-soft:#3a2e15;--cell:#2c3038;}}
+:root[data-theme="dark"]{
+  --bg:#121418;--card:#1c1f25;--text:#e8eaee;--muted:#9aa1ad;--line:#2c3038;
+  --accent:#6b9bff;--accent-soft:#1f2a44;--ok:#3cc574;--ok-soft:#173326;--bad:#ff6b6b;--bad-soft:#3a1d1f;
+  --warn:#f0b34a;--warn-soft:#3a2e15;--cell:#2c3038;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:16px;padding-top:max(16px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom))}
+header{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+header h1{font-size:20px;margin:0;flex:1;cursor:pointer}
+button{font:inherit;color:inherit;cursor:pointer;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 14px}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.ghost{background:transparent}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.tile{text-align:left;padding:16px;border-radius:14px}
+.tile b{display:block;font-size:16px;margin-bottom:4px}
+.tile span{color:var(--muted);font-size:13px}
+.muted{color:var(--muted)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.spread{justify-content:space-between}
+.bar{height:8px;background:var(--cell);border-radius:6px;overflow:hidden;flex:1;min-width:60px}
+.bar i{display:block;height:100%;background:var(--accent)}
+.bar.bad i{background:var(--bad)} .bar.ok i{background:var(--ok)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.kpi{background:var(--bg);border-radius:12px;padding:12px}
+.kpi b{font-size:22px;display:block}
+.kpi span{font-size:12px;color:var(--muted)}
+.banner{border-left:4px solid var(--warn);background:var(--warn-soft)}
+.banner.badb{border-left-color:var(--bad);background:var(--bad-soft)}
+.list button{width:100%;text-align:left;margin-bottom:8px;display:flex;gap:12px;align-items:center}
+.list button .t{flex:1}
+.pill{font-size:12px;padding:2px 8px;border-radius:20px;background:var(--bg);color:var(--muted);white-space:nowrap}
+.pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)}
+.qimg{width:100%;border-radius:10px;display:block;margin-bottom:12px;background:#000}
+.qtext{font-size:17px;font-weight:600;margin:0 0 14px}
+.ans{display:block;width:100%;text-align:left;margin-bottom:8px;padding:12px 14px;line-height:1.35}
+.ans .k{display:inline-block;width:22px;color:var(--muted);font-weight:600}
+.ans.ok{background:var(--ok-soft);border-color:var(--ok)} .ans.bad{background:var(--bad-soft);border-color:var(--bad)}
+.ans:disabled{cursor:default;opacity:1}
+.tip{background:var(--accent-soft);border-radius:10px;padding:12px;margin-top:10px;font-size:14px}
+.qhead{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:10px;font-size:13px}
+.dots{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.dots i{width:20px;height:20px;border-radius:5px;background:var(--cell);font-size:10px;font-style:normal;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer}
+.dots i.ok{background:var(--ok);color:#fff}.dots i.bad{background:var(--bad);color:#fff}.dots i.cur{outline:2px solid var(--accent)}
+.heat{display:grid;grid-template-columns:repeat(40,1fr);gap:2px}
+.heat i{aspect-ratio:1;border-radius:2px;background:var(--cell);cursor:pointer}
+.heat i.l1{background:var(--ok)} .heat i.l2{background:var(--warn)} .heat i.l3{background:var(--bad)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+textarea{width:100%;font:inherit;color:inherit;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;min-height:56px}
+.tr{display:grid;grid-template-columns:1fr 120px 54px;gap:10px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line);font-size:14px}
+.tr:last-child{border-bottom:0}
+h2{font-size:18px;margin:0 0 10px} h3{font-size:15px;margin:0 0 8px}
+.big{font-size:44px;font-weight:700;line-height:1}
+.tag{font-size:11px;padding:2px 7px;border-radius:6px;background:var(--warn);color:#fff;font-weight:600}
+@media (max-width:560px){.heat{grid-template-columns:repeat(20,1fr)}.tr{grid-template-columns:1fr 70px 46px}.qtext{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 onclick="go('home')">🚗 ПДД Тренажёр <span class="muted" style="font-size:13px;font-weight:400">800 вопросов · A, B, M</span></h1>
+    <button class="ghost" onclick="toggleTheme()" title="Тема">◐</button>
+  </header>
+  <main id="app"></main>
+</div>
+<script src="questions.js"></script>
+<script>
+const Q = window.PDD_QUESTIONS || [];
+const BY = Object.fromEntries(Q.map(q => [q.id, q]));
+const TOPIC_ORDER = ["Общие положения","Общие обязанности водителей","Применение специальных сигналов","Сигналы светофора и регулировщика","Применение аварийной сигнализации и знака аварийной остановки","Начало движения, маневрирование","Расположение транспортных средств на проезжей части","Скорость движения","Обгон, опережение, встречный разъезд","Остановка и стоянка","Проезд перекрестков","Пешеходные переходы и места остановок маршрутных транспортных средств","Движение через железнодорожные пути","Движение по автомагистралям","Движение в жилых зонах","Приоритет маршрутных транспортных средств","Пользование внешними световыми приборами и звуковыми сигналами","Буксировка механических транспортных средств","Учебная езда и дополнительные требования к движению велосипедистов","Перевозка людей и грузов","Неисправности и условия допуска транспортных средств к эксплуатации","Дорожные знаки","Дорожная разметка","Безопасность движения и техника управления автомобилем","Оказание доврачебной медицинской помощи","Ответственность водителя"];
+const TOPICS = [...new Set([...TOPIC_ORDER.filter(t => Q.some(q => q.topic === t)), ...Q.map(q => q.topic)])];
+const DAY = 864e5;
+const INTERVALS = [0, 1, 3, 7, 16, 35]; // дни до следующего повтора по «коробкам»
+const KEY = 'pdd24_v1';
+
+// ---------- хранилище ----------
+let S = load();
+function load(){
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(KEY)); } catch(e){}
+  // резервная копия внутри Android-приложения — если хранилище WebView очистилось
+  if (!s && window.Android) { try { s = JSON.parse(Android.loadBackup() || 'null'); } catch(e){} }
+  s = s || {};
+  s.q = s.q || {}; s.notes = s.notes || {}; s.days = s.days || {}; s.sess = s.sess || {};
+  s.marathon = s.marathon || null; s.history = s.history || [];
+  return s;
+}
+let backupT = null;
+function save(){
+  const json = JSON.stringify(S);
+  try { localStorage.setItem(KEY, json); } catch(e){}
+  if (window.Android) {
+    clearTimeout(backupT);
+    backupT = setTimeout(() => { try {
+      Android.backup(JSON.stringify(S));
+      Android.sync(dueIds().length, mistakeIds().length, S.marathon ? S.marathon.i : -1, Q.length);
+    } catch(e){} }, 400);
+  }
+}
+// просим браузер не удалять данные (важно для iPhone)
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e){}
+const today = () => new Date().toISOString().slice(0,10);
+const st = id => S.q[id] || (S.q[id] = {s:0,w:0,r:0,box:0,due:0,last:0,lastOk:null});
+
+function record(id, ok){
+  const x = st(id), now = Date.now();
+  x.s++; x.last = now; x.lastOk = ok;
+  if (ok){ x.r++; if (x.w > 0) { x.box = Math.min(x.box + 1, INTERVALS.length - 1); x.due = now + INTERVALS[x.box] * DAY; } }
+  else { x.w++; x.box = 0; x.due = now; }
+  const d = today(); S.days[d] = S.days[d] || {n:0,ok:0}; S.days[d].n++; if (ok) S.days[d].ok++;
+  save();
+}
+// «в ошибках» = ошибался и ещё не закрепил (меньше 3 верных подряд после ошибки)
+const inMistakes = id => { const x = S.q[id]; return x && x.w > 0 && x.box < 3; };
+const isDue = id => { const x = S.q[id]; return x && x.w > 0 && x.box < INTERVALS.length - 1 && x.due <= Date.now(); };
+const mistakeIds = () => Q.filter(q => inMistakes(q.id)).map(q => q.id).sort((a,b) => S.q[b].w - S.q[a].w);
+const dueIds = () => Q.filter(q => isDue(q.id)).map(q => q.id).sort((a,b) => (S.q[b].w - S.q[b].box) - (S.q[a].w - S.q[a].box));
+const level = id => { const x = S.q[id]; if (!x || !x.s) return 0; if (inMistakes(id)) return x.lastOk ? 2 : 3; return 1; };
+
+function topicStats(t){
+  const ids = Q.filter(q => q.topic === t).map(q => q.id);
+  let seen=0, wrong=0, tries=0, right=0, mastered=0, mis=0;
+  ids.forEach(id => { const x = S.q[id]; if (!x || !x.s) return; seen++; tries += x.s; wrong += x.w; right += x.r; if (!inMistakes(id) && x.lastOk) mastered++; if (inMistakes(id)) mis++; });
+  return {t, total: ids.length, seen, tries, wrong, mastered, mis, err: tries ? wrong / tries : 0};
+}
+
+// ---------- утилиты ----------
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct = (a,b) => b ? Math.round(a / b * 100) : 0;
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--){ const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const plural = (n, f) => n + ' ' + f[(n%10==1&&n%100!=11)?0:(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20))?1:2];
+const QW = ['вопрос','вопроса','вопросов'];
+const app = document.getElementById('app');
+function toggleTheme(){
+  const r = document.documentElement, dark = getComputedStyle(r).getPropertyValue('--bg').trim() === '#121418';
+  r.dataset.theme = dark ? 'light' : 'dark'; try { localStorage.setItem('pdd_theme', r.dataset.theme); } catch(e){}
+}
+try { const t = localStorage.getItem('pdd_theme'); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+
+// ---------- навигация ----------
+let view = 'home', session = null;
+function go(v, arg){ view = v; session = null; window.scrollTo(0,0); ({home, topics, tickets, stats, summary})[v](arg); }
+
+// ---------- главная ----------
+function home(){
+  const seen = Q.filter(q => S.q[q.id] && S.q[q.id].s).length;
+  let tries=0, right=0; Object.values(S.q).forEach(x => { tries += x.s; right += x.r; });
+  const mis = mistakeIds().length, due = dueIds().length;
+  const m = S.marathon;
+  const days = Object.keys(S.days).sort();
+  const lastDay = days[days.length - 1];
+  const gap = lastDay ? Math.round((new Date(today()) - new Date(lastDay)) / DAY) : null;
+  const weak = TOPICS.map(topicStats).filter(x => x.tries >= 5).sort((a,b) => b.err - a.err).slice(0,3).filter(x => x.err > 0.1);
+  const streak = (() => { let n = 0, d = new Date(today()); if (!S.days[today()]) d = new Date(d - DAY); while (S.days[d.toISOString().slice(0,10)]) { n++; d = new Date(d - DAY); } return n; })();
+
+  let rem = [];
+  if (due) rem.push(`<div class="card banner badb"><div class="row spread"><div><h3>🔁 Пора повторить: ${plural(due, QW)}</h3><div class="muted">Вопросы, где ты ошибался — повтор через 1, 3, 7, 16 дней закрепляет их в памяти.</div></div><button class="primary" onclick="startReview()">Повторить сейчас</button></div></div>`);
+  if (gap !== null && gap >= 2) rem.push(`<div class="card banner"><h3>👋 Тебя не было ${plural(gap,['день','дня','дней'])}</h3><div class="muted">Начни с разминки из самых трудных вопросов — так знания вернутся быстрее.</div></div>`);
+  if (weak.length) rem.push(`<div class="card banner"><h3>🎯 Подтяни слабые темы</h3>${weak.map(w => `<div class="row" style="margin-top:6px"><button class="ghost" style="padding:4px 10px" onclick="startTopic(${TOPICS.indexOf(w.t)})">${esc(w.t)}</button><span class="pill bad">${Math.round(w.err*100)}% ошибок</span></div>`).join('')}</div>`);
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent), standalone = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+  if (ios && !standalone && !window.Android) rem.unshift(`<div class="card banner"><h3>📲 Установи на экран «Домой»</h3><div class="muted">Нажми «Поделиться» <b>⎋</b> → «На экран „Домой“». Так прогресс сохраняется надёжно и приложение работает без интернета. В обычной вкладке Safari может стереть данные, если долго не заходить.</div></div>`);
+  if (!seen) rem.push(`<div class="card banner"><h3>Привет!</h3><div class="muted">Начни марафон — пройди все 800 вопросов по порядку в случайном перемешивании. Прогресс сохраняется автоматически, можно закрыть и вернуться.</div></div>`);
+
+  app.innerHTML = `
+  ${rem.join('')}
+  <div class="card">
+    <div class="kpis">
+      <div class="kpi"><b>${seen}<span style="font-size:14px" class="muted"> / ${Q.length}</span></b><span>вопросов изучено</span></div>
+      <div class="kpi"><b>${pct(right, tries)}%</b><span>верных ответов</span></div>
+      <div class="kpi"><b style="color:var(--bad)">${mis}</b><span>в работе над ошибками</span></div>
+      <div class="kpi"><b>${streak} 🔥</b><span>дней подряд</span></div>
+    </div>
+    <div class="row" style="margin-top:12px"><div class="bar ok"><i style="width:${pct(seen,Q.length)}%"></i></div><span class="muted" style="font-size:13px">${pct(seen,Q.length)}%</span></div>
+  </div>
+  <div class="grid">
+    <button class="tile primary" onclick="startMarathon()"><b>🏃 Марафон</b><span style="color:#fff;opacity:.85">${m ? (m.i >= m.order.length ? 'Пройден! Смотреть итоги' : `Продолжить: ${m.i} / ${m.order.length}`) : 'Все 800 вопросов подряд'}</span></button>
+    <button class="tile" onclick="startSmart()"><b>🧠 Умная тренировка</b><span>20 вопросов: сначала трудные и забытые</span></button>
+    <button class="tile" onclick="go('topics')"><b>📚 По темам</b><span>${TOPICS.length} тем из ПДД</span></button>
+    <button class="tile" onclick="go('tickets')"><b>🎫 Билеты</b><span>40 билетов по 20 вопросов</span></button>
+    <button class="tile" onclick="startMistakes()"><b>❌ Мои ошибки</b><span>${mis ? plural(mis, QW) + ' — исправь их' : 'Пока ошибок нет'}</span></button>
+    <button class="tile" onclick="startExam()"><b>📝 Экзамен</b><span>20 вопросов, не больше 2 ошибок</span></button>
+    <button class="tile" onclick="go('stats')"><b>📊 Статистика</b><span>Карта 800 вопросов, слабые темы</span></button>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <div class="row spread"><span class="muted" style="font-size:13px">Прогресс хранится в этом браузере. Сделай копию, чтобы не потерять.</span>
+    <div class="row"><button onclick="exportData()">💾 Сохранить в файл</button><button onclick="importData()">📂 Загрузить</button></div></div>
+  </div>`;
+}
+
+// ---------- списки ----------
+function topics(){
+  app.innerHTML = `<div class="card"><h2>Темы</h2><div class="list">${TOPICS.map((t,i) => {
+    const s = topicStats(t);
+    return `<button onclick="startTopic(${i})"><span class="t">${esc(t)}<br><span class="muted" style="font-size:12px">${s.seen} / ${s.total} пройдено${s.mis ? ` · <span style="color:var(--bad)">${s.mis} в ошибках</span>` : ''}</span></span>
+      <div class="bar ok" style="max-width:110px"><i style="width:${pct(s.mastered,s.total)}%"></i></div>
+      ${s.tries ? `<span class="pill ${s.err > .2 ? 'bad' : s.err > .08 ? 'warn' : 'ok'}">${Math.round(s.err*100)}% ош.</span>` : `<span class="pill">${s.total}</span>`}</button>`;
+  }).join('')}</div></div>`;
+}
+function tickets(){
+  let h = '';
+  for (let t = 1; t <= 40; t++){
+    const ids = Q.filter(q => q.t === t).map(q => q.id);
+    const done = ids.filter(id => S.q[id] && S.q[id].s).length, bad = ids.filter(inMistakes).length;
+    h += `<button onclick="startTicket(${t})" style="padding:12px 6px"><b>${t}</b><br><span class="muted" style="font-size:11px">${done ? `${done}/20` : '—'}${bad ? ` · <span style="color:var(--bad)">${bad}✗</span>` : ''}</span></button>`;
+  }
+  app.innerHTML = `<div class="card"><h2>Билеты</h2><div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:8px">${h}</div></div>`;
+}
+
+// ---------- запуск сессий ----------
+function startMarathon(){
+  if (!S.marathon) { S.marathon = {order: shuffle(Q.map(q => q.id)), i: 0, res: {}, started: Date.now()}; save(); }
+  if (S.marathon.i >= S.marathon.order.length) return go('summary');
+  run({key:'marathon', title:'Марафон', marathon:true});
+}
+function startTopic(i){ const t = TOPICS[i]; run({key:'topic:'+i, title:t, ids: Q.filter(q => q.topic === t).map(q => q.id)}); }
+function startTicket(t){ run({key:'ticket:'+t, title:'Билет ' + t, ids: Q.filter(q => q.t === t).map(q => q.id), fresh:true}); }
+function startMistakes(){
+  const ids = mistakeIds();
+  if (!ids.length) { alert('Ошибок пока нет — отличная работа!'); return; }
+  run({title:'Работа над ошибками', ids: shuffle(ids), fresh:true, hint:'Вопрос уходит из ошибок после 3 верных ответов подряд (в разные дни).'});
+}
+function startReview(){ const ids = dueIds(); if (!ids.length) return startSmart(); run({title:'Повторение', ids: ids.slice(0,30), fresh:true}); }
+function startExam(){ const t = 1 + (Math.random()*40|0); run({title:'Экзамен (билет '+t+')', ids: shuffle(Q.filter(q => q.t === t).map(q => q.id)), fresh:true, exam:true}); }
+function startSmart(){
+  const due = dueIds();
+  const pool = Q.filter(q => !due.includes(q.id)).map(q => {
+    const x = S.q[q.id]; let w;
+    if (!x || !x.s) w = 2;                      // новые
+    else w = 0.3 + x.w * 4 - x.box * 0.5 + (x.lastOk ? 0 : 3);   // чем больше ошибок — тем чаще
+    return {id: q.id, w: Math.max(w, 0.15) * Math.random()};
+  }).sort((a,b) => b.w - a.w).map(x => x.id);
+  run({title:'Умная тренировка', ids: [...due.slice(0,10), ...pool].slice(0,20), fresh:true});
+}
+function openOne(id){ run({title:'Вопрос из билета ' + BY[id].t, ids:[id], fresh:true}); }
+
+function run(o){
+  let ids = o.ids, saved = o.key && !o.fresh && S.sess[o.key];
+  session = Object.assign({i: 0, res: {}, review: null, answered: null}, o);
+  if (o.marathon){ session.ids = S.marathon.order; session.i = S.marathon.i; session.res = S.marathon.res; }
+  else if (saved && saved.n === ids.length && saved.i < ids.length){ session.ids = saved.ids; session.i = saved.i; session.res = saved.res; }
+  view = 'quiz'; render();
+}
+function persist(){
+  if (session.marathon){ S.marathon.i = session.i; S.marathon.res = session.res; }
+  else if (session.key){ S.sess[session.key] = {ids: session.ids, i: session.i, res: session.res, n: session.ids.length}; }
+  save();
+}
+
+// ---------- экран вопроса ----------
+function currentId(){ return session.review || session.ids[session.i]; }
+function render(){
+  const s = session, id = currentId(), q = BY[id], x = S.q[id];
+  const n = s.ids.length;
+  const dots = n <= 30 ? `<div class="dots">${s.ids.map((d,k) => `<i class="${s.res[d] === true ? 'ok' : s.res[d] === false ? 'bad' : ''} ${k === s.i && !s.review ? 'cur' : ''}" onclick="jump(${k})">${k+1}</i>`).join('')}</div>` : '';
+  const done = Object.keys(s.res).length, okc = Object.values(s.res).filter(Boolean).length;
+  const a = s.answered;
+  const note = S.notes[id] || '';
+  app.innerHTML = `
+  <div class="card">
+    <div class="row spread" style="margin-bottom:10px"><b>${esc(s.title)}</b><button class="ghost" style="padding:5px 10px" onclick="leave()">✕ Выйти</button></div>
+    ${s.hint ? `<div class="muted" style="font-size:13px;margin-bottom:10px">${s.hint}</div>` : ''}
+    ${dots}
+    ${n > 30 ? `<div class="row" style="margin-bottom:12px"><div class="bar"><i style="width:${pct(s.i,n)}%"></i></div><span class="muted" style="font-size:13px">${s.i} / ${n} · ✓ ${okc} · ✗ ${done-okc}</span></div>` : ''}
+    <div class="qhead">
+      ${s.review ? '<span class="tag">ПОВТОР ОШИБКИ</span>' : ''}
+      <span class="pill">Билет ${q.t}, вопрос ${q.n}</span>
+      <span class="pill">${esc(q.topic)}</span>
+      ${x && x.w ? `<span class="pill bad">ошибок: ${x.w}</span>` : ''}
+      ${x && x.w && !inMistakes(id) ? '<span class="pill ok">закреплён</span>' : ''}
+    </div>
+    ${q.img ? `<img class="qimg" src="images/${q.img}" alt="">` : ''}
+    <p class="qtext">${esc(q.q)}</p>
+    ${q.a.map((t,k) => {
+      let c = '';
+      if (a !== null){ if (k === q.c) c = 'ok'; else if (k === a) c = 'bad'; }
+      return `<button class="ans ${c}" ${a !== null ? 'disabled' : ''} onclick="answer(${k})"><span class="k">${k+1}.</span>${esc(t)}</button>`;
+    }).join('')}
+    ${a !== null ? `
+      <div class="tip"><b>${a === q.c ? '✅ Верно!' : '❌ Неверно. Правильный ответ: ' + (q.c+1)}</b><br>${esc(q.tip)}</div>
+      <div style="margin-top:10px"><div class="muted" style="font-size:12px;margin-bottom:4px">📌 Своя подсказка, чтобы запомнить (покажется при следующей ошибке):</div>
+      <textarea id="note" placeholder="Например: «при выезде с прилегающей — уступаю всем»" oninput="S.notes['${id}']=this.value;save()">${esc(note)}</textarea></div>
+      <div class="row spread" style="margin-top:12px"><span class="muted" style="font-size:12px">Enter — дальше</span><button class="primary" id="next" onclick="next()">Дальше →</button></div>`
+      : (note && x && x.w ? `<details class="tip" style="background:var(--warn-soft)"><summary>📌 Твоя подсказка (сначала попробуй сам)</summary>${esc(note)}</details>` : '')}
+  </div>`;
+}
+function answer(k){
+  const s = session, id = currentId(), q = BY[id];
+  if (s.answered !== null) return;
+  const ok = k === q.c;
+  s.answered = k; record(id, ok);
+  if (!s.review) { if (!(id in s.res)) s.res[id] = ok; }
+  persist(); render();
+  if (!ok && !s.review) { const el = document.querySelector('.tip'); el && el.scrollIntoView({behavior:'smooth', block:'nearest'}); }
+}
+function next(){
+  const s = session;
+  if (s.answered === null) return;
+  s.answered = null;
+  if (s.review) { s.review = null; }
+  else {
+    s.i++;
+    // в марафон каждые 7 вопросов подмешиваем вопрос, где были ошибки
+    if (s.marathon && s.i % 7 === 0 && s.i < s.ids.length){
+      const d = dueIds().filter(id => id !== s.ids[s.i - 1]);
+      if (d.length) s.review = d[0];
+    }
+  }
+  persist();
+  if (s.i >= s.ids.length) return finish();
+  window.scrollTo(0,0); render();
+}
+function jump(k){ if (session.marathon) return; session.i = k; session.answered = null; session.review = null; render(); }
+function leave(){ persist(); go('home'); }
+
+// ---------- итоги ----------
+function finish(){
+  const s = session;
+  if (s.marathon){ S.marathon.finished = Date.now(); save(); return go('summary'); }
+  const ok = Object.values(s.res).filter(Boolean).length, n = s.ids.length, bad = s.ids.filter(id => s.res[id] === false);
+  if (s.key) delete S.sess[s.key];
+  S.history.push({d: Date.now(), title: s.title, n, ok}); save();
+  const passed = s.exam ? (n - ok <= 2) : null;
+  view = 'done';
+  app.innerHTML = `<div class="card" style="text-align:center">
+    <div class="big" style="color:${ok/n >= .9 ? 'var(--ok)' : ok/n >= .7 ? 'var(--warn)' : 'var(--bad)'}">${ok} / ${n}</div>
+    <p>${esc(s.title)} — ${pct(ok,n)}% верно</p>
+    ${passed !== null ? `<h2>${passed ? '🎉 Экзамен сдан!' : '😕 Экзамен не сдан (больше 2 ошибок)'}</h2>` : ''}
+    <div class="row" style="justify-content:center">
+      ${bad.length ? `<button class="primary" onclick='run({title:"Повтор ошибок: ${esc(s.title)}",ids:${JSON.stringify(bad)},fresh:true})'>Перерешать ошибки (${bad.length})</button>` : ''}
+      <button onclick="go('home')">На главную</button>
+    </div></div>
+    ${bad.length ? `<div class="card"><h3>Где ошибся</h3>${bad.map(id => `<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${esc(BY[id].q)}</b><br><span style="color:var(--ok)">✓ ${esc(BY[id].a[BY[id].c])}</span></div>`).join('')}</div>` : ''}`;
+}
+
+function summary(){
+  const m = S.marathon;
+  if (!m) return go('home');
+  const ids = m.order, res = m.res;
+  const ok = ids.filter(id => res[id] === true).length, bad = ids.filter(id => res[id] === false).length;
+  const rows = TOPICS.map(t => {
+    const tid = ids.filter(id => BY[id].topic === t && id in res);
+    const w = tid.filter(id => res[id] === false).length;
+    return {t, n: tid.length, w, p: tid.length ? w / tid.length : 0};
+  }).filter(r => r.n).sort((a,b) => b.p - a.p);
+  const totalW = bad || 1;
+  const worst = rows.filter(r => r.w).slice(0,3);
+  const hardest = Q.filter(q => S.q[q.id] && S.q[q.id].w).sort((a,b) => S.q[b.id].w - S.q[a.id].w).slice(0,10);
+  const doneAll = m.i >= ids.length;
+  app.innerHTML = `
+  <div class="card" style="text-align:center">
+    <h2>${doneAll ? '🏁 Марафон пройден!' : 'Промежуточные итоги марафона'}</h2>
+    <div class="big" style="color:${ok/(ok+bad) >= .9 ? 'var(--ok)' : 'var(--warn)'}">${pct(ok, ok+bad)}%</div>
+    <p class="muted">${ok} верно · ${bad} ошибок из ${ok+bad} вопросов${m.finished ? ' · за ' + Math.max(1, Math.round((m.finished - m.started)/DAY)) + ' дн.' : ''}</p>
+  </div>
+  ${worst.length ? `<div class="card banner badb"><h3>🧠 Запомни: больше всего ошибок в темах</h3>
+    ${worst.map((r,k) => `<div style="margin:8px 0"><b>${k+1}. ${esc(r.t)}</b> — ${Math.round(r.p*100)}% вопросов темы с ошибкой (${pct(r.w,totalW)}% всех твоих ошибок)</div>`).join('')}
+    <div class="row" style="margin-top:10px"><button class="primary" onclick="trainWeak()">Тренировать эти темы</button><button onclick="startMistakes()">Все ошибки</button></div></div>` : ''}
+  <div class="card"><h3>Ошибки по темам</h3>
+    <div class="tr muted" style="font-size:12px"><span>Тема</span><span>% ошибок в теме</span><span>доля</span></div>
+    ${rows.map(r => `<div class="tr"><span>${esc(r.t)} <span class="muted">(${r.w}/${r.n})</span></span><div class="bar ${r.p > .2 ? 'bad' : r.p > .08 ? '' : 'ok'}"><i style="width:${Math.max(r.p*100, 2)}%"></i></div><b>${Math.round(r.p*100)}%</b></div>`).join('')}
+  </div>
+  ${hardest.length ? `<div class="card"><h3>🔥 Топ самых трудных вопросов</h3>${hardest.map(q => `<div class="row" style="padding:7px 0;border-bottom:1px solid var(--line)"><span style="flex:1;font-size:14px">${esc(q.q)}</span><span class="pill bad">${S.q[q.id].w}✗</span><button style="padding:4px 10px" onclick="openOne('${q.id}')">→</button></div>`).join('')}</div>` : ''}
+  <div class="row">
+    ${doneAll ? `<button onclick="if(confirm('Начать новый марафон? Общая статистика и ошибки сохранятся.')){S.marathon=null;save();startMarathon()}">🔄 Новый марафон</button>` : `<button class="primary" onclick="startMarathon()">Продолжить марафон</button>`}
+    <button onclick="go('home')">На главную</button>
+  </div>`;
+}
+function trainWeak(){
+  const m = S.marathon;
+  const rows = TOPICS.map(t => ({t, p: topicStats(t).err})).sort((a,b) => b.p - a.p).slice(0,3).map(r => r.t);
+  const ids = Q.filter(q => rows.includes(q.topic)).map(q => q.id);
+  const wrong = ids.filter(inMistakes), rest = shuffle(ids.filter(id => !inMistakes(id)));
+  run({title:'Слабые темы', ids: shuffle([...wrong, ...rest.slice(0, Math.max(0, 30 - wrong.length))]), fresh:true});
+}
+
+// ---------- статистика ----------
+function stats(){
+  const rows = TOPICS.map(topicStats);
+  const tried = rows.filter(r => r.tries).sort((a,b) => b.err - a.err);
+  const days = Object.keys(S.days).sort().slice(-14);
+  const maxN = Math.max(1, ...days.map(d => S.days[d].n));
+  app.innerHTML = `
+  <div class="card"><h2>Карта всех 800 вопросов</h2>
+    <div class="muted" style="font-size:13px;margin-bottom:10px">Каждая клетка — вопрос (по билетам: строка = билет${innerWidth <= 560 ? ', две строки' : ''}). Нажми, чтобы решить.</div>
+    <div class="heat">${Q.map(q => `<i class="l${level(q.id)}" title="Билет ${q.t}, №${q.n}" onclick="openOne('${q.id}')"></i>`).join('')}</div>
+    <div class="legend"><span><i style="background:var(--cell)"></i>не решал</span><span><i style="background:var(--ok)"></i>знаю</span><span><i style="background:var(--warn)"></i>исправляюсь</span><span><i style="background:var(--bad)"></i>ошибка</span></div>
+  </div>
+  <div class="card"><h2>Процент ошибок по темам</h2>
+    ${tried.length ? tried.map(r => `<div class="tr"><span>${esc(r.t)} <span class="muted">(${r.seen}/${r.total})</span></span><div class="bar ${r.err > .2 ? 'bad' : r.err > .08 ? '' : 'ok'}"><i style="width:${Math.max(r.err*100,2)}%"></i></div><b>${Math.round(r.err*100)}%</b></div>`).join('') : '<span class="muted">Пока нет ответов.</span>'}
+  </div>
+  ${days.length ? `<div class="card"><h2>Активность (14 дней)</h2><div style="display:flex;gap:6px;align-items:flex-end;height:120px">
+    ${days.map(d => `<div style="flex:1;text-align:center;font-size:10px" class="muted"><div title="${S.days[d].n} ответов, ${pct(S.days[d].ok,S.days[d].n)}% верно" style="height:${Math.round(S.days[d].n/maxN*90)+4}px;background:var(--accent);border-radius:4px 4px 0 0"></div>${d.slice(8)}.${d.slice(5,7)}</div>`).join('')}
+  </div></div>` : ''}
+  <div class="row"><button onclick="if(confirm('Стереть весь прогресс?')){localStorage.removeItem(KEY);S=load();go('home')}">🗑 Сбросить прогресс</button>${S.marathon && Object.keys(S.marathon.res).length ? `<button onclick="go('summary')">Итоги марафона</button>` : ''}</div>`;
+}
+
+// ---------- экспорт / импорт ----------
+function exportData(){
+  if (window.Android) { Android.exportFile(JSON.stringify(S), 'pdd-progress-' + today() + '.json'); return; }
+  const b = new Blob([JSON.stringify(S)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'pdd-progress-' + today() + '.json'; a.click();
+}
+function applyImport(text){
+  try { const d = JSON.parse(text); if (!d.q) throw 0; localStorage.setItem(KEY, JSON.stringify(d)); S = load(); save(); go('home'); alert('Прогресс загружен'); }
+  catch(e){ alert('Не удалось прочитать файл'); }
+}
+window.onImportFile = applyImport;
+window.onBack = () => { if (view === 'home') return false; if (view === 'quiz') leave(); else go('home'); return true; };
+window.onAppResume = () => { if (view === 'home') home(); };
+function importData(){
+  if (window.Android) { Android.importFile(); return; }
+  const i = document.createElement('input'); i.type = 'file'; i.accept = '.json';
+  i.onchange = () => { const r = new FileReader(); r.onload = () => applyImport(r.result); r.readAsText(i.files[0]); };
+  i.click();
+}
+
+// ---------- клавиатура ----------
+document.addEventListener('keydown', e => {
+  if (view !== 'quiz' || !session || e.target.tagName === 'TEXTAREA') return;
+  if (session.answered === null && /^[1-5]$/.test(e.key)) { const k = +e.key - 1; if (k < BY[currentId()].a.length) answer(k); }
+  else if (session.answered !== null && (e.key === 'Enter' || e.key === 'ArrowRight' || e.key === ' ')) { e.preventDefault(); next(); }
+});
+
+if (!Q.length) app.innerHTML = '<div class="card">Не найден файл questions.js — положи его рядом с index.html.</div>';
+else { home(); if (window.Android) save(); }
+if ('serviceWorker' in navigator && location.protocol === 'https:' && !window.Android) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
